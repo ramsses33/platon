@@ -1,63 +1,152 @@
-const buyOrders = [
-  ["0.1208", "12,540 π"],
-  ["0.1207", "8,210 π"],
-  ["0.1205", "21,300 π"],
-  ["0.1202", "5,940 π"],
-  ["0.1200", "31,600 π"],
-];
+"use client";
 
-const sellOrders = [
-  ["0.1212", "4,820 π"],
-  ["0.1214", "7,140 π"],
-  ["0.1218", "10,250 π"],
-  ["0.1220", "15,880 π"],
-  ["0.1225", "28,400 π"],
-];
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+type Order = {
+  id: string;
+  order_type: "BUY" | "SELL";
+  price: number;
+  remaining: number;
+  status: "OPEN" | "PARTIAL" | "FILLED" | "CANCELLED";
+  created_at: string;
+};
 
 export default function OrderBook() {
+  const [buyOrders, setBuyOrders] = useState<Order[]>([]);
+  const [sellOrders, setSellOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadOrders();
+
+    function handleOrdersUpdated() {
+      loadOrders();
+    }
+
+    window.addEventListener("platon-orders-updated", handleOrdersUpdated);
+
+    const interval = setInterval(() => {
+      loadOrders();
+    }, 15000);
+
+    return () => {
+      window.removeEventListener(
+        "platon-orders-updated",
+        handleOrdersUpdated
+      );
+      clearInterval(interval);
+    };
+  }, []);
+
+  async function loadOrders() {
+    const { data, error } = await supabase
+      .from("orders")
+      .select(
+        "id, order_type, price, remaining, status, created_at"
+      )
+      .in("status", ["OPEN", "PARTIAL"])
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      setLoading(false);
+      return;
+    }
+
+    const orders = (data || []).map((order) => ({
+      ...order,
+      price: Number(order.price),
+      remaining: Number(order.remaining),
+    })) as Order[];
+
+    const buys = orders
+      .filter((order) => order.order_type === "BUY")
+      .sort((a, b) => b.price - a.price);
+
+    const sells = orders
+      .filter((order) => order.order_type === "SELL")
+      .sort((a, b) => a.price - b.price);
+
+    setBuyOrders(buys);
+    setSellOrders(sells);
+    setLoading(false);
+  }
+
   return (
     <div className="rounded-[30px] border border-white/10 bg-white/[0.05] p-8 backdrop-blur-2xl">
-      <h2 className="mb-8 text-3xl font-black">
-        Order Book
-      </h2>
+      <div className="mb-8 flex items-center justify-between">
+        <h2 className="text-3xl font-black">Order Book</h2>
 
-      <div className="grid grid-cols-2 gap-8">
-        <div>
-          <h3 className="mb-4 font-bold text-emerald-400">
-            BUY
-          </h3>
-
-          <div className="space-y-3">
-            {buyOrders.map(([price, amount]) => (
-              <div
-                key={price}
-                className="flex justify-between rounded-xl bg-emerald-400/10 px-4 py-3"
-              >
-                <span className="text-emerald-400">${price}</span>
-                <span>{amount}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h3 className="mb-4 font-bold text-red-400">
-            SELL
-          </h3>
-
-          <div className="space-y-3">
-            {sellOrders.map(([price, amount]) => (
-              <div
-                key={price}
-                className="flex justify-between rounded-xl bg-red-400/10 px-4 py-3"
-              >
-                <span className="text-red-400">${price}</span>
-                <span>{amount}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <span className="rounded-full bg-emerald-400/10 px-3 py-2 text-xs font-bold text-emerald-300">
+          LIVE
+        </span>
       </div>
+
+      {loading ? (
+        <p className="text-gray-400">Loading orders...</p>
+      ) : (
+        <div className="grid gap-8 md:grid-cols-2">
+          <div>
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-bold text-emerald-400">BUY</h3>
+              <span className="text-xs text-gray-500">
+                Price / Remaining
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              {buyOrders.length === 0 ? (
+                <p className="rounded-xl bg-black/20 px-4 py-3 text-sm text-gray-500">
+                  No buy orders
+                </p>
+              ) : (
+                buyOrders.map((order) => (
+                  <div
+                    key={order.id}
+                    className="flex justify-between gap-4 rounded-xl bg-emerald-400/10 px-4 py-3"
+                  >
+                    <span className="font-bold text-emerald-400">
+                      ${order.price.toFixed(8)}
+                    </span>
+
+                    <span>{order.remaining.toLocaleString()} π</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-bold text-red-400">SELL</h3>
+              <span className="text-xs text-gray-500">
+                Price / Remaining
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              {sellOrders.length === 0 ? (
+                <p className="rounded-xl bg-black/20 px-4 py-3 text-sm text-gray-500">
+                  No sell orders
+                </p>
+              ) : (
+                sellOrders.map((order) => (
+                  <div
+                    key={order.id}
+                    className="flex justify-between gap-4 rounded-xl bg-red-400/10 px-4 py-3"
+                  >
+                    <span className="font-bold text-red-400">
+                      ${order.price.toFixed(8)}
+                    </span>
+
+                    <span>{order.remaining.toLocaleString()} π</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

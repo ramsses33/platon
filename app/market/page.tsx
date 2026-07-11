@@ -7,6 +7,7 @@ import OrderBook from "@/components/market/OrderBook";
 import RecentTrades from "@/components/market/RecentTrades";
 import MarketStats from "@/components/market/MarketStats";
 import SearchBar from "@/components/market/SearchBar";
+import MarketPrice from "@/components/market/MarketPrice";
 
 export default function MarketPage() {
   return (
@@ -20,6 +21,7 @@ export default function MarketPage() {
             title="Buy & Sell π"
             description="PLATON is traded only through its official market. The network price updates every 13 minutes."
           />
+          <MarketPrice />
 
           <MarketStats />
           <SearchBar />

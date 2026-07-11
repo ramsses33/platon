@@ -26,25 +26,31 @@ export default function SendPlatonForm() {
 
     setLoading(true);
 
-    const { data: receiverWallet } = await supabase
-      .from("wallets")
-      .select("wallet_address")
-      .eq("wallet_address", receiverAddress)
-      .single();
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
 
-    if (!receiverWallet) {
-      toast.error("Receiver wallet not found.");
+    if (!accessToken) {
+      toast.error("You are not logged in.");
       setLoading(false);
       return;
     }
 
-    const { error } = await supabase.rpc("send_platon", {
-      receiver_address: receiverAddress,
-      send_amount: Number(amount),
+    const response = await fetch("/api/wallet/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        receiverAddress,
+        amount: Number(amount),
+        accessToken,
+      }),
     });
 
-    if (error) {
-      toast.error(error.message);
+    const result = await response.json();
+
+    if (!response.ok) {
+      toast.error(result.error || "Transfer failed.");
       setLoading(false);
       return;
     }
