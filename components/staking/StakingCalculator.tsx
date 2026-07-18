@@ -12,6 +12,8 @@ import {
 import Button from "@/components/ui/Button";
 
 const STAKING_APR = 8.4;
+const DAYS_PER_YEAR = 365;
+const MONTH_ESTIMATE_DAYS = 30;
 
 export default function StakingCalculator() {
   const [amount, setAmount] = useState("");
@@ -21,31 +23,55 @@ export default function StakingCalculator() {
   const enteredAmount = useMemo(() => {
     const value = Number(amount);
 
-    if (!Number.isFinite(value) || value <= 0) {
+    if (
+      !Number.isFinite(value) ||
+      value <= 0
+    ) {
       return 0;
     }
 
     return value;
   }, [amount]);
 
+  const annualRate =
+    STAKING_APR / 100;
+
   const monthlyReward =
-    estimatedAmount * (STAKING_APR / 100) / 12;
+    estimatedAmount *
+    annualRate *
+    (MONTH_ESTIMATE_DAYS /
+      DAYS_PER_YEAR);
 
   const yearlyReward =
-    estimatedAmount * (STAKING_APR / 100);
+    estimatedAmount *
+    annualRate;
 
   const totalAfterYear =
-    estimatedAmount + yearlyReward;
+    estimatedAmount +
+    yearlyReward;
 
   function estimateRewards() {
-    setEstimatedAmount(enteredAmount);
+    setEstimatedAmount(
+      enteredAmount
+    );
   }
 
-  function formatAmount(value: number) {
-    return value.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 8,
-    });
+  function formatAmount(
+    value: number
+  ) {
+    if (
+      !Number.isFinite(value)
+    ) {
+      return "0.00";
+    }
+
+    return value.toLocaleString(
+      "en-US",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 8,
+      }
+    );
   }
 
   return (
@@ -96,10 +122,13 @@ export default function StakingCalculator() {
               type="number"
               min="0"
               step="0.00000001"
+              inputMode="decimal"
               placeholder="0.00"
               value={amount}
               onChange={(event) =>
-                setAmount(event.target.value)
+                setAmount(
+                  event.target.value
+                )
               }
               className="w-full rounded-2xl border border-white/10 bg-black/25 py-4 pl-14 pr-16 text-xl font-black text-white outline-none transition placeholder:text-white/20 focus:border-violet-400/50 focus:bg-black/35"
             />
@@ -126,7 +155,9 @@ export default function StakingCalculator() {
           <div className="mt-5 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10 text-cyan-400">
-                <CalendarDays size={18} />
+                <CalendarDays
+                  size={18}
+                />
               </div>
 
               <div>
@@ -135,20 +166,26 @@ export default function StakingCalculator() {
                 </p>
 
                 <p className="mt-1 text-xs text-white/25">
-                  Estimated earnings
+                  30-day estimate
                 </p>
               </div>
             </div>
 
             <span className="text-lg font-black text-emerald-400">
-              +{formatAmount(monthlyReward)} π
+              +
+              {formatAmount(
+                monthlyReward
+              )}{" "}
+              π
             </span>
           </div>
 
           <div className="mt-5 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-violet-400/20 bg-violet-400/10 text-violet-400">
-                <TrendingUp size={18} />
+                <TrendingUp
+                  size={18}
+                />
               </div>
 
               <div>
@@ -157,13 +194,17 @@ export default function StakingCalculator() {
                 </p>
 
                 <p className="mt-1 text-xs text-white/25">
-                  Estimated earnings
+                  365-day estimate
                 </p>
               </div>
             </div>
 
             <span className="text-lg font-black text-emerald-400">
-              +{formatAmount(yearlyReward)} π
+              +
+              {formatAmount(
+                yearlyReward
+              )}{" "}
+              π
             </span>
           </div>
         </div>
@@ -181,7 +222,10 @@ export default function StakingCalculator() {
             </div>
 
             <p className="text-xl font-black text-white">
-              {formatAmount(totalAfterYear)} π
+              {formatAmount(
+                totalAfterYear
+              )}{" "}
+              π
             </p>
           </div>
         </div>
@@ -189,10 +233,16 @@ export default function StakingCalculator() {
         <div className="mt-6">
           <Button
             variant="secondary"
-            onClick={estimateRewards}
-            disabled={enteredAmount <= 0}
+            onClick={
+              estimateRewards
+            }
+            disabled={
+              enteredAmount <= 0
+            }
           >
-            <Sparkles size={18} />
+            <Sparkles
+              size={18}
+            />
 
             <span className="ml-2">
               Estimate Earnings
@@ -201,8 +251,9 @@ export default function StakingCalculator() {
         </div>
 
         <p className="mt-4 text-center text-xs leading-5 text-white/25">
-          Calculations are estimates based on the current
-          APR and do not guarantee future rewards.
+          Calculations use a 365-day year and match the
+          current staking reward formula. Future APR may
+          change.
         </p>
       </div>
     </section>
