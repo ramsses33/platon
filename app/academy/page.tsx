@@ -7,7 +7,6 @@ import {
   GraduationCap,
   ShieldCheck,
   Sparkles,
-  WalletCards,
 } from "lucide-react";
 
 import Navbar from "@/components/layout/Navbar";
@@ -31,11 +30,11 @@ const lessons = [
     text: "Learn how to purchase PLATON through the official market.",
     level: "Beginner",
     lesson: "Lesson 2",
-    href: "",
+    href: "/academy/how-to-buy",
     icon: Coins,
     iconStyle:
       "border-yellow-400/20 bg-yellow-400/10 text-yellow-300",
-    available: false,
+    available: true,
   },
   {
     title: "Wallet Security",
@@ -172,7 +171,7 @@ export default function AcademyPage() {
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
 
                 <p className="text-sm text-white/40">
-                  Lesson 1 is now available
+                  Lessons 1 and 2 are now available
                 </p>
               </div>
 
