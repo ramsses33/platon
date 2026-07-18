@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   ArrowRight,
   BookOpen,
@@ -142,7 +141,7 @@ export default function AcademyPage() {
                   </p>
 
                   {lesson.available ? (
-                    <Link
+                    <a
                       href={lesson.href}
                       className="mt-7 flex items-center justify-between rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.08] px-5 py-4 text-sm font-black text-emerald-400 transition hover:border-emerald-400/35 hover:bg-emerald-400/15"
                     >
@@ -152,7 +151,7 @@ export default function AcademyPage() {
                         size={18}
                         className="transition group-hover:translate-x-1"
                       />
-                    </Link>
+                    </a>
                   ) : (
                     <div className="mt-7 flex items-center justify-between rounded-2xl border border-white/[0.07] bg-black/20 px-5 py-4 text-sm font-black text-white/25">
                       <span>Coming Soon</span>
