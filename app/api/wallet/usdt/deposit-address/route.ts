@@ -20,24 +20,19 @@ function createJsonResponse(
   body: Record<string, unknown>,
   status = 200
 ) {
-  return NextResponse.json(
-    body,
-    {
-      status,
+  return NextResponse.json(body, {
+    status,
 
-      headers: {
-        "Cache-Control":
-          "no-store, no-cache, must-revalidate",
-      },
-    }
-  );
+    headers: {
+      "Cache-Control":
+        "no-store, no-cache, must-revalidate",
+    },
+  });
 }
 
-function getDepositNetwork():
-  TronDepositNetwork {
+function getDepositNetwork(): TronDepositNetwork {
   const network =
-    process.env
-      .TRON_DEPOSIT_NETWORK
+    process.env.TRON_DEPOSIT_NETWORK
       ?.trim()
       .toUpperCase();
 
@@ -53,59 +48,43 @@ function getDepositNetwork():
   return network;
 }
 
-export async function POST(
-  request: Request
-) {
+export async function POST(request: Request) {
   try {
     const authorization =
-      request.headers.get(
-        "authorization"
-      );
+      request.headers.get("authorization");
 
     if (
-      !authorization?.startsWith(
-        "Bearer "
-      )
+      !authorization?.startsWith("Bearer ")
     ) {
       return createJsonResponse(
         {
-          error:
-            "Unauthorized",
+          error: "Unauthorized",
         },
         401
       );
     }
 
-    const accessToken =
-      authorization
-        .slice(
-          "Bearer ".length
-        )
-        .trim();
+    const accessToken = authorization
+      .slice("Bearer ".length)
+      .trim();
 
-    if (
-      !accessToken
-    ) {
+    if (!accessToken) {
       return createJsonResponse(
         {
-          error:
-            "Unauthorized",
+          error: "Unauthorized",
         },
         401
       );
     }
 
     const supabaseUrl =
-      process.env
-        .NEXT_PUBLIC_SUPABASE_URL;
+      process.env.NEXT_PUBLIC_SUPABASE_URL;
 
     const anonKey =
-      process.env
-        .NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     const serviceRoleKey =
-      process.env
-        .SUPABASE_SERVICE_ROLE_KEY;
+      process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (
       !supabaseUrl ||
@@ -125,46 +104,37 @@ export async function POST(
       );
     }
 
-    const network =
-      getDepositNetwork();
+    const network = getDepositNetwork();
 
     /*
      * Пользовательский клиент
      * нужен только для проверки
      * текущей авторизованной сессии.
      */
-    const userClient =
-      createClient(
-        supabaseUrl,
-        anonKey,
-        {
-          global: {
-            headers: {
-              Authorization:
-                `Bearer ${accessToken}`,
-            },
+    const userClient = createClient(
+      supabaseUrl,
+      anonKey,
+      {
+        global: {
+          headers: {
+            Authorization:
+              `Bearer ${accessToken}`,
           },
+        },
 
-          auth: {
-            persistSession:
-              false,
-
-            autoRefreshToken:
-              false,
-          },
-        }
-      );
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      }
+    );
 
     const {
-      data:
-        userData,
-
-      error:
-        userError,
-    } =
-      await userClient.auth.getUser(
-        accessToken
-      );
+      data: userData,
+      error: userError,
+    } = await userClient.auth.getUser(
+      accessToken
+    );
 
     if (
       userError ||
@@ -179,65 +149,46 @@ export async function POST(
       );
     }
 
-    const userId =
-      userData.user.id;
+    const userId = userData.user.id;
 
     /*
      * Service Role используется
      * только на сервере.
      */
-    const adminClient =
-      createClient(
-        supabaseUrl,
-        serviceRoleKey,
-        {
-          auth: {
-            persistSession:
-              false,
-
-            autoRefreshToken:
-              false,
-          },
-        }
-      );
+    const adminClient = createClient(
+      supabaseUrl,
+      serviceRoleKey,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      }
+    );
 
     /*
-     * Сначала проверяем:
-     * возможно, адрес этому
-     * пользователю уже создан.
+     * Возвращаем только активный
+     * депозитный адрес пользователя.
      */
     const {
-      data:
-        existingAddress,
+      data: existingAddress,
+      error: existingAddressError,
+    } = await adminClient
+      .from("usdt_deposit_addresses")
+      .select(
+        `
+          id,
+          address,
+          network,
+          created_at
+        `
+      )
+      .eq("user_id", userId)
+      .eq("network", network)
+      .eq("is_active", true)
+      .maybeSingle();
 
-      error:
-        existingAddressError,
-    } =
-      await adminClient
-        .from(
-          "usdt_deposit_addresses"
-        )
-        .select(
-          `
-            id,
-            address,
-            network,
-            created_at
-          `
-        )
-        .eq(
-          "user_id",
-          userId
-        )
-        .eq(
-          "network",
-          network
-        )
-        .maybeSingle();
-
-    if (
-      existingAddressError
-    ) {
+    if (existingAddressError) {
       console.error(
         "Unable to read existing USDT deposit address:",
         existingAddressError
@@ -252,34 +203,18 @@ export async function POST(
       );
     }
 
-    if (
-      existingAddress
-    ) {
+    if (existingAddress) {
       const address =
-        existingAddress as
-          DepositAddressRow;
+        existingAddress as DepositAddressRow;
 
       return createJsonResponse({
-        success:
-          true,
-
-        created:
-          false,
-
-        network:
-          address.network,
-
-        token:
-          "USDT",
-
-        standard:
-          "TRC20",
-
-        address:
-          address.address,
-
-        createdAt:
-          address.created_at,
+        success: true,
+        created: false,
+        network: address.network,
+        token: "USDT",
+        standard: "TRC20",
+        address: address.address,
+        createdAt: address.created_at,
       });
     }
 
@@ -288,19 +223,13 @@ export async function POST(
      * derivation index.
      */
     const {
-      data:
-        derivationIndexData,
+      data: derivationIndexData,
+      error: derivationIndexError,
+    } = await adminClient.rpc(
+      "next_tron_deposit_derivation_index"
+    );
 
-      error:
-        derivationIndexError,
-    } =
-      await adminClient.rpc(
-        "next_tron_deposit_derivation_index"
-      );
-
-    if (
-      derivationIndexError
-    ) {
+    if (derivationIndexError) {
       console.error(
         "Unable to allocate TRON derivation index:",
         derivationIndexError
@@ -315,10 +244,9 @@ export async function POST(
       );
     }
 
-    const derivationIndex =
-      Number(
-        derivationIndexData
-      );
+    const derivationIndex = Number(
+      derivationIndexData
+    );
 
     if (
       !Number.isSafeInteger(
@@ -354,31 +282,44 @@ export async function POST(
       );
 
     const {
-      data:
-        insertedAddress,
-
-      error:
-        insertError,
-    } =
-      await adminClient
-        .from(
-          "usdt_deposit_addresses"
-        )
-        .insert({
-          user_id:
-            userId,
-
+      data: insertedAddress,
+      error: insertError,
+    } = await adminClient
+      .from("usdt_deposit_addresses")
+      .insert({
+        user_id: userId,
+        network,
+        address:
+          generatedWallet.address,
+        derivation_index:
+          derivationIndex,
+        is_active: true,
+      })
+      .select(
+        `
+          id,
+          address,
           network,
+          created_at
+        `
+      )
+      .single();
 
-          address:
-            generatedWallet.address,
-
-          derivation_index:
-            derivationIndex,
-
-          is_active:
-            true,
-        })
+    if (insertError) {
+      /*
+       * Защита от двух
+       * одновременных запросов.
+       *
+       * Если другой запрос уже
+       * создал активный адрес,
+       * возвращаем его.
+       */
+      const {
+        data: concurrentAddress,
+        error:
+          concurrentAddressError,
+      } = await adminClient
+        .from("usdt_deposit_addresses")
         .select(
           `
             id,
@@ -387,75 +328,25 @@ export async function POST(
             created_at
           `
         )
-        .single();
-
-    if (
-      insertError
-    ) {
-      /*
-       * Защита от двух
-       * одновременных запросов.
-       *
-       * Если другой запрос уже
-       * создал адрес, просто
-       * возвращаем существующий.
-       */
-      const {
-        data:
-          concurrentAddress,
-
-        error:
-          concurrentAddressError,
-      } =
-        await adminClient
-          .from(
-            "usdt_deposit_addresses"
-          )
-          .select(
-            `
-              id,
-              address,
-              network,
-              created_at
-            `
-          )
-          .eq(
-            "user_id",
-            userId
-          )
-          .eq(
-            "network",
-            network
-          )
-          .maybeSingle();
+        .eq("user_id", userId)
+        .eq("network", network)
+        .eq("is_active", true)
+        .maybeSingle();
 
       if (
         !concurrentAddressError &&
         concurrentAddress
       ) {
         const address =
-          concurrentAddress as
-            DepositAddressRow;
+          concurrentAddress as DepositAddressRow;
 
         return createJsonResponse({
-          success:
-            true,
-
-          created:
-            false,
-
-          network:
-            address.network,
-
-          token:
-            "USDT",
-
-          standard:
-            "TRC20",
-
-          address:
-            address.address,
-
+          success: true,
+          created: false,
+          network: address.network,
+          token: "USDT",
+          standard: "TRC20",
+          address: address.address,
           createdAt:
             address.created_at,
         });
@@ -476,37 +367,21 @@ export async function POST(
     }
 
     const address =
-      insertedAddress as
-        DepositAddressRow;
+      insertedAddress as DepositAddressRow;
 
     return createJsonResponse(
       {
-        success:
-          true,
-
-        created:
-          true,
-
-        network:
-          address.network,
-
-        token:
-          "USDT",
-
-        standard:
-          "TRC20",
-
-        address:
-          address.address,
-
-        createdAt:
-          address.created_at,
+        success: true,
+        created: true,
+        network: address.network,
+        token: "USDT",
+        standard: "TRC20",
+        address: address.address,
+        createdAt: address.created_at,
       },
       201
     );
-  } catch (
-    error
-  ) {
+  } catch (error) {
     console.error(
       "USDT deposit address API error:",
       error
