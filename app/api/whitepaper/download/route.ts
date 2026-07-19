@@ -1,30 +1,28 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const pdfUrl = new URL("/PLATON_Whitepaper.pdf", request.url);
+    const filePath = path.join(
+      process.cwd(),
+      "public",
+      "PLATON_Whitepaper.pdf",
+    );
 
-    const pdfResponse = await fetch(pdfUrl, {
-      cache: "no-store",
-    });
+    const pdfBuffer = await readFile(filePath);
 
-    if (!pdfResponse.ok) {
-      return new Response("Whitepaper PDF not found", {
-        status: 404,
-      });
-    }
-
-    const pdfBuffer = await pdfResponse.arrayBuffer();
-
-    return new Response(pdfBuffer, {
+    return new Response(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
-        "Content-Type": "application/pdf",
+        "Content-Type": "application/octet-stream",
         "Content-Disposition":
           'attachment; filename="PLATON_Whitepaper.pdf"',
         "Content-Length": String(pdfBuffer.byteLength),
-        "Cache-Control": "public, max-age=3600",
+        "Cache-Control": "no-store, max-age=0",
+        "X-Content-Type-Options": "nosniff",
       },
     });
   } catch (error) {
