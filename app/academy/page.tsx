@@ -73,11 +73,11 @@ const lessons = [
     text: "Learn governance, ecosystem tools and future utilities.",
     level: "Advanced",
     lesson: "Lesson 6",
-    href: "",
+    href: "/academy/advanced-platon",
     icon: BrainCircuit,
     iconStyle:
       "border-rose-400/20 bg-rose-400/10 text-rose-400",
-    available: false,
+    available: true,
   },
 ];
 
@@ -115,10 +115,7 @@ export default function AcademyPage() {
                     <div
                       className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${lesson.iconStyle}`}
                     >
-                      <Icon
-                        size={21}
-                        strokeWidth={2.2}
-                      />
+                      <Icon size={21} strokeWidth={2.2} />
                     </div>
 
                     <div className="text-right">
@@ -170,7 +167,7 @@ export default function AcademyPage() {
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
 
                 <p className="text-sm text-white/40">
-                  Lessons 1, 2, 3, 4 and 5 are now available
+                  All 6 Academy lessons are now available
                 </p>
               </div>
 
