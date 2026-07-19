@@ -51,11 +51,11 @@ const lessons = [
     text: "Earn passive rewards by staking your PLATON.",
     level: "Intermediate",
     lesson: "Lesson 4",
-    href: "",
+    href: "/academy/staking-guide",
     icon: Sparkles,
     iconStyle:
       "border-violet-400/20 bg-violet-400/10 text-violet-400",
-    available: false,
+    available: true,
   },
   {
     title: "Blockchain Basics",
@@ -170,7 +170,7 @@ export default function AcademyPage() {
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
 
                 <p className="text-sm text-white/40">
-                  Lessons 1, 2 and 3 are now available
+                  Lessons 1, 2, 3 and 4 are now available
                 </p>
               </div>
 
