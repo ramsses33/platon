@@ -8,8 +8,8 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import Navbar from "@/components/layout/Navbar";
 import PageHeader from "@/components/layout/PageHeader";
 
 const lessons = [
@@ -40,11 +40,11 @@ const lessons = [
     text: "Protect your account and securely manage your PLATON assets.",
     level: "Beginner",
     lesson: "Lesson 3",
-    href: "",
+    href: "/academy/wallet-security",
     icon: ShieldCheck,
     iconStyle:
       "border-cyan-400/20 bg-cyan-400/10 text-cyan-400",
-    available: false,
+    available: true,
   },
   {
     title: "Staking Guide",
@@ -170,7 +170,7 @@ export default function AcademyPage() {
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
 
                 <p className="text-sm text-white/40">
-                  Lessons 1 and 2 are now available
+                  Lessons 1, 2 and 3 are now available
                 </p>
               </div>
 
