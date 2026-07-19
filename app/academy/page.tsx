@@ -62,11 +62,11 @@ const lessons = [
     text: "Understand blocks, transactions and validators.",
     level: "Intermediate",
     lesson: "Lesson 5",
-    href: "",
+    href: "/academy/blockchain-basics",
     icon: BookOpen,
     iconStyle:
       "border-blue-400/20 bg-blue-400/10 text-blue-400",
-    available: false,
+    available: true,
   },
   {
     title: "Advanced PLATON",
@@ -170,7 +170,7 @@ export default function AcademyPage() {
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
 
                 <p className="text-sm text-white/40">
-                  Lessons 1, 2, 3 and 4 are now available
+                  Lessons 1, 2, 3, 4 and 5 are now available
                 </p>
               </div>
 
