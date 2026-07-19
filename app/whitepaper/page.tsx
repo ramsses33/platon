@@ -91,17 +91,14 @@ export default function WhitepaperPage() {
                   <div
                     className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${section.iconStyle}`}
                   >
-                    <Icon
-                      size={21}
-                      strokeWidth={2.2}
-                    />
+                    <Icon size={21} strokeWidth={2.2} />
                   </div>
 
                   <h2 className="mt-6 text-2xl font-black tracking-[-0.03em] text-white">
                     {section.title}
                   </h2>
 
-                  <p className="mt-4 text-sm leading-7 text-whitemt-6 text-2xl font-black tracking-[-0./40 sm:text-base">
+                  <p className="mt-4 text-sm leading-7 text-white/40 sm:text-base">
                     {section.text}
                   </p>
                 </article>
@@ -141,8 +138,7 @@ export default function WhitepaperPage() {
                 </a>
 
                 <a
-                  href="/PLATON_Whitepaper.pdf"
-                  download="PLATON_Whitepaper.pdf"
+                  href="/api/whitepaper/download"
                   className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-black text-black transition hover:bg-emerald-300"
                 >
                   <Download size={18} />
