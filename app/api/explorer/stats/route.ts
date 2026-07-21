@@ -1,0 +1,135 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+function getAdminClient() {
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  const serviceRoleKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl) {
+    throw new Error(
+      "NEXT_PUBLIC_SUPABASE_URL is not configured.",
+    );
+  }
+
+  if (!serviceRoleKey) {
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY is not configured.",
+    );
+  }
+
+  return createClient(
+    supabaseUrl,
+    serviceRoleKey,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    },
+  );
+}
+
+export async function GET() {
+  try {
+    const supabase = getAdminClient();
+
+    const [
+      blocksResult,
+      transactionsResult,
+      latestBlockResult,
+    ] = await Promise.all([
+      supabase
+        .from("network_blocks")
+        .select("*", {
+          count: "exact",
+          head: true,
+        }),
+
+      supabase
+        .from("transactions")
+        .select("*", {
+          count: "exact",
+          head: true,
+        }),
+
+      supabase
+        .from("network_blocks")
+        .select(
+          `
+            block_number,
+            confirmed_at
+          `,
+        )
+        .order("block_number", {
+          ascending: false,
+        })
+        .limit(1),
+    ]);
+
+    if (blocksResult.error) {
+      throw blocksResult.error;
+    }
+
+    if (transactionsResult.error) {
+      throw transactionsResult.error;
+    }
+
+    if (latestBlockResult.error) {
+      throw latestBlockResult.error;
+    }
+
+    const latestBlock =
+      latestBlockResult.data?.[0] ?? null;
+
+    return NextResponse.json(
+      {
+        success: true,
+        stats: {
+          totalBlocks:
+            blocksResult.count ?? 0,
+
+          totalTransactions:
+            transactionsResult.count ?? 0,
+
+          latestBlockNumber:
+            latestBlock?.block_number ??
+            null,
+
+          latestBlockConfirmedAt:
+            latestBlock?.confirmed_at ??
+            null,
+
+          networkStatus: "online",
+        },
+      },
+      {
+        headers: {
+          "Cache-Control":
+            "public, s-maxage=5, stale-while-revalidate=10",
+        },
+      },
+    );
+  } catch (error) {
+    console.error(
+      "Explorer stats API error:",
+      error,
+    );
+
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          "Unable to load network statistics.",
+      },
+      {
+        status: 500,
+      },
+    );
+  }
+}
