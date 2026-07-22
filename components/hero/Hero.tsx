@@ -53,9 +53,23 @@ export default function Hero() {
               </Button>
             </Link>
 
-            <Button variant="secondary">
-              Whitepaper
-            </Button>
+            <Link
+              href="#ecosystem"
+              className="w-full sm:w-auto"
+            >
+              <Button>
+                Explore the Ecosystem
+              </Button>
+            </Link>
+
+            <Link
+              href="/whitepaper"
+              className="w-full sm:w-auto"
+            >
+              <Button variant="secondary">
+                Whitepaper
+              </Button>
+            </Link>
           </div>
 
           <div className="mt-9 grid min-w-0 gap-4 sm:mt-12 sm:grid-cols-2 sm:gap-5">
