@@ -27,35 +27,40 @@ const roadmap = [
 
 export default function TokenomicsRoadmap() {
   return (
-    <section className="bg-[#05070A] px-8 py-28 text-white">
-      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2">
+    <section className="w-full overflow-hidden bg-[#05070A] px-4 py-16 text-white sm:px-6 sm:py-20 lg:px-8 lg:py-28">
+      <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
         <div
           id="tokenomics"
-          className="scroll-mt-32 rounded-[36px] border border-white/10 bg-white/[0.05] p-8 backdrop-blur-2xl"
+          className="min-w-0 scroll-mt-28 rounded-[24px] border border-white/10 bg-white/[0.05] p-5 backdrop-blur-2xl sm:scroll-mt-32 sm:rounded-[30px] sm:p-7 lg:rounded-[36px] lg:p-8"
         >
-          <p className="text-sm uppercase tracking-[5px] text-emerald-400">
+          <p className="text-xs uppercase leading-5 tracking-[3px] text-emerald-400 sm:text-sm sm:tracking-[5px]">
             Tokenomics
           </p>
 
-          <h2 className="mt-4 text-4xl font-black">
+          <h2 className="mt-4 break-words text-3xl font-black leading-tight sm:text-4xl">
             PLATON π Distribution
           </h2>
 
-          <div className="mt-10 space-y-5">
+          <div className="mt-8 space-y-5 sm:mt-10">
             {tokenomics.map(
               ([percent, label]) => (
-                <div key={label}>
-                  <div className="mb-2 flex justify-between">
-                    <span>{label}</span>
+                <div
+                  key={label}
+                  className="min-w-0"
+                >
+                  <div className="mb-2 flex min-w-0 items-center justify-between gap-4">
+                    <span className="min-w-0 break-words text-sm sm:text-base">
+                      {label}
+                    </span>
 
-                    <span className="text-emerald-400">
+                    <span className="shrink-0 text-sm font-bold text-emerald-400 sm:text-base">
                       {percent}
                     </span>
                   </div>
 
-                  <div className="h-3 rounded-full bg-white/10">
+                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/10 sm:h-3">
                     <div
-                      className="h-3 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400"
+                      className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400"
                       style={{
                         width: percent,
                       }}
@@ -69,32 +74,32 @@ export default function TokenomicsRoadmap() {
 
         <div
           id="roadmap"
-          className="scroll-mt-32 rounded-[36px] border border-white/10 bg-white/[0.05] p-8 backdrop-blur-2xl"
+          className="min-w-0 scroll-mt-28 rounded-[24px] border border-white/10 bg-white/[0.05] p-5 backdrop-blur-2xl sm:scroll-mt-32 sm:rounded-[30px] sm:p-7 lg:rounded-[36px] lg:p-8"
         >
-          <p className="text-sm uppercase tracking-[5px] text-yellow-400">
+          <p className="text-xs uppercase leading-5 tracking-[3px] text-yellow-400 sm:text-sm sm:tracking-[5px]">
             Roadmap
           </p>
 
-          <h2 className="mt-4 text-4xl font-black">
+          <h2 className="mt-4 break-words text-3xl font-black leading-tight sm:text-4xl">
             The Road to PLATON Network
           </h2>
 
-          <div className="mt-10 space-y-5">
+          <div className="mt-8 space-y-4 sm:mt-10 sm:space-y-5">
             {roadmap.map(
               ([year, title, text]) => (
                 <div
                   key={year}
-                  className="rounded-2xl bg-black/30 p-5"
+                  className="min-w-0 rounded-2xl bg-black/30 p-4 sm:p-5"
                 >
-                  <p className="text-emerald-400">
+                  <p className="text-sm font-bold text-emerald-400 sm:text-base">
                     {year}
                   </p>
 
-                  <h3 className="mt-2 text-2xl font-bold">
+                  <h3 className="mt-2 break-words text-xl font-bold leading-tight sm:text-2xl">
                     {title}
                   </h3>
 
-                  <p className="mt-2 text-gray-400">
+                  <p className="mt-2 break-words text-sm leading-6 text-gray-400 sm:text-base sm:leading-7">
                     {text}
                   </p>
                 </div>
