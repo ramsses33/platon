@@ -7,15 +7,17 @@ const stats = [
 
 export default function MarketStats() {
   return (
-    <div className="grid gap-5 md:grid-cols-4">
+    <div className="grid w-full min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4">
       {stats.map(([title, value]) => (
         <div
           key={title}
-          className="rounded-[28px] border border-white/10 bg-white/[0.05] p-6 backdrop-blur-2xl"
+          className="min-w-0 rounded-[22px] border border-white/10 bg-white/[0.05] p-5 backdrop-blur-2xl sm:rounded-[28px] sm:p-6"
         >
-          <p className="text-sm text-gray-400">{title}</p>
+          <p className="text-xs text-gray-400 sm:text-sm">
+            {title}
+          </p>
 
-          <h3 className="mt-3 text-3xl font-black text-white">
+          <h3 className="mt-2 break-words text-2xl font-black leading-tight text-white sm:mt-3 sm:text-3xl">
             {value}
           </h3>
         </div>
