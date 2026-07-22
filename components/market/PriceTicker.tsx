@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import { supabase } from "@/lib/supabase";
 
 type MarketPriceRow = {
@@ -10,17 +14,19 @@ type MarketPriceRow = {
 const REFRESH_INTERVAL_MS = 5000;
 
 export default function PriceTicker() {
-  const [price, setPrice] = useState<number | null>(null);
+  const [price, setPrice] =
+    useState<number | null>(null);
 
   useEffect(() => {
     let active = true;
 
     async function loadPrice() {
-      const { data, error } = await supabase
-        .from("market_price")
-        .select("price")
-        .eq("id", 1)
-        .single();
+      const { data, error } =
+        await supabase
+          .from("market_price")
+          .select("price")
+          .eq("id", 1)
+          .single();
 
       if (!active) {
         return;
@@ -31,25 +37,34 @@ export default function PriceTicker() {
           "Unable to load PLATON price:",
           error,
         );
+
         return;
       }
 
-      const nextPrice = Number(data.price);
+      const nextPrice = Number(
+        data.price,
+      );
 
       if (Number.isFinite(nextPrice)) {
         setPrice(nextPrice);
       }
     }
 
-    loadPrice();
+    const initialLoadTimer =
+      window.setTimeout(() => {
+        void loadPrice();
+      }, 0);
 
-    const refreshTimer = window.setInterval(
-      loadPrice,
-      REFRESH_INTERVAL_MS,
-    );
+    const refreshTimer =
+      window.setInterval(() => {
+        void loadPrice();
+      }, REFRESH_INTERVAL_MS);
+
+    const channelName =
+      `home-market-price-${window.crypto.randomUUID()}`;
 
     const channel = supabase
-      .channel("home-market-price")
+      .channel(channelName)
       .on(
         "postgres_changes",
         {
@@ -59,6 +74,10 @@ export default function PriceTicker() {
           filter: "id=eq.1",
         },
         (payload) => {
+          if (!active) {
+            return;
+          }
+
           const updatedRow =
             payload.new as MarketPriceRow;
 
@@ -66,7 +85,9 @@ export default function PriceTicker() {
             updatedRow.price,
           );
 
-          if (Number.isFinite(nextPrice)) {
+          if (
+            Number.isFinite(nextPrice)
+          ) {
             setPrice(nextPrice);
           }
         },
@@ -75,8 +96,18 @@ export default function PriceTicker() {
 
     return () => {
       active = false;
-      window.clearInterval(refreshTimer);
-      void supabase.removeChannel(channel);
+
+      window.clearTimeout(
+        initialLoadTimer,
+      );
+
+      window.clearInterval(
+        refreshTimer,
+      );
+
+      void supabase.removeChannel(
+        channel,
+      );
     };
   }, []);
 
