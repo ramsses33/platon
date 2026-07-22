@@ -31,6 +31,9 @@ function EarthModel() {
   const outerGlowRef =
     useRef<THREE.Mesh>(null);
 
+  const goldRimRef =
+    useRef<THREE.Mesh>(null);
+
   const pointerRef =
     useRef<PointerPosition>({
       x: 0,
@@ -134,13 +137,16 @@ function EarthModel() {
       atmosphereRef.current;
     const outerGlow =
       outerGlowRef.current;
+    const goldRim =
+      goldRimRef.current;
 
     if (
       !group ||
       !core ||
       !grid ||
       !atmosphere ||
-      !outerGlow
+      !outerGlow ||
+      !goldRim
     ) {
       return;
     }
@@ -156,17 +162,17 @@ function EarthModel() {
 
     core.rotation.y +=
       delta *
-      0.025 *
+      0.018 *
       motionMultiplier;
 
     grid.rotation.y +=
       delta *
-      0.045 *
+      0.032 *
       motionMultiplier;
 
     grid.rotation.x =
-      Math.sin(elapsed * 0.22) *
-      0.018 *
+      Math.sin(elapsed * 0.18) *
+      0.012 *
       motionMultiplier;
 
     const pointerX =
@@ -179,31 +185,33 @@ function EarthModel() {
 
     const targetRotationX =
       reducedMotion
-        ? 0
-        : -pointerY * 0.07;
+        ? -0.05
+        : -0.05 -
+          pointerY * 0.035;
 
     const targetRotationY =
       reducedMotion
-        ? 0
-        : pointerX * 0.09;
+        ? -0.2
+        : -0.2 +
+          pointerX * 0.045;
 
     const targetPositionX =
       reducedMotion
         ? 0
-        : pointerX * 0.08;
+        : pointerX * 0.035;
 
     const targetPositionY =
       reducedMotion
         ? 0
-        : -pointerY * 0.055 +
+        : -pointerY * 0.025 +
           Math.sin(
-            elapsed * 0.34,
+            elapsed * 0.28,
           ) *
-            0.04;
+            0.022;
 
     const smoothing =
       1 -
-      Math.exp(-delta * 2.4);
+      Math.exp(-delta * 2.2);
 
     group.rotation.x =
       THREE.MathUtils.lerp(
@@ -238,9 +246,9 @@ function EarthModel() {
         ? 1
         : 1 +
           Math.sin(
-            elapsed * 0.62,
+            elapsed * 0.5,
           ) *
-            0.008;
+            0.004;
 
     atmosphere.scale.setScalar(
       atmosphereScale,
@@ -251,22 +259,27 @@ function EarthModel() {
         ? 1
         : 1 +
           Math.sin(
-            elapsed * 0.48,
+            elapsed * 0.4,
           ) *
-            0.018;
+            0.008;
 
     outerGlow.scale.setScalar(
       glowScale,
     );
+
+    goldRim.rotation.z =
+      elapsed *
+      0.012 *
+      motionMultiplier;
   });
 
   return (
     <group
       ref={groupRef}
       rotation={[
-        -0.08,
-        -0.28,
-        0.04,
+        -0.05,
+        -0.2,
+        0.025,
       ]}
     >
       <mesh ref={coreRef}>
@@ -279,13 +292,13 @@ function EarthModel() {
         />
 
         <meshStandardMaterial
-          color="#06151B"
-          emissive="#004F5B"
-          emissiveIntensity={0.38}
-          metalness={0.58}
-          roughness={0.44}
+          color="#030B0E"
+          emissive="#00343A"
+          emissiveIntensity={0.2}
+          metalness={0.42}
+          roughness={0.56}
           transparent
-          opacity={0.88}
+          opacity={0.76}
         />
       </mesh>
 
@@ -296,15 +309,15 @@ function EarthModel() {
         <sphereGeometry
           args={[
             3.07,
-            42,
-            42,
+            40,
+            40,
           ]}
         />
 
         <meshBasicMaterial
-          color="#30E4E8"
+          color="#52C7CA"
           transparent
-          opacity={0.16}
+          opacity={0.095}
           wireframe
           depthWrite={false}
           blending={
@@ -316,7 +329,7 @@ function EarthModel() {
 
       <mesh
         ref={atmosphereRef}
-        scale={1.045}
+        scale={1.04}
       >
         <sphereGeometry
           args={[
@@ -327,9 +340,9 @@ function EarthModel() {
         />
 
         <meshBasicMaterial
-          color="#00D8E6"
+          color="#50C8C7"
           transparent
-          opacity={0.065}
+          opacity={0.035}
           side={THREE.BackSide}
           depthWrite={false}
           blending={
@@ -341,7 +354,7 @@ function EarthModel() {
 
       <mesh
         ref={outerGlowRef}
-        scale={1.12}
+        scale={1.1}
       >
         <sphereGeometry
           args={[
@@ -352,9 +365,9 @@ function EarthModel() {
         />
 
         <meshBasicMaterial
-          color="#00D6CE"
+          color="#6FBDB9"
           transparent
-          opacity={0.025}
+          opacity={0.014}
           side={THREE.BackSide}
           depthWrite={false}
           blending={
@@ -365,26 +378,27 @@ function EarthModel() {
       </mesh>
 
       <mesh
+        ref={goldRimRef}
         position={[
+          -0.08,
           0,
-          0,
-          0.06,
+          0.09,
         ]}
         scale={1.025}
       >
         <torusGeometry
           args={[
             3.08,
-            0.018,
+            0.015,
             10,
             180,
           ]}
         />
 
         <meshBasicMaterial
-          color="#E1B842"
+          color="#D5BB75"
           transparent
-          opacity={0.18}
+          opacity={0.1}
           depthWrite={false}
           blending={
             THREE.AdditiveBlending
@@ -399,7 +413,7 @@ function EarthModel() {
 export default function Earth3D() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute left-1/2 top-[58%] h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2 opacity-45 sm:h-[750px] sm:w-[750px] sm:opacity-55 lg:left-[67%] lg:top-[51%] lg:h-[920px] lg:w-[920px] lg:opacity-70">
+      <div className="absolute left-1/2 top-[59%] h-[535px] w-[535px] -translate-x-1/2 -translate-y-1/2 opacity-30 sm:h-[700px] sm:w-[700px] sm:opacity-38 lg:left-[69%] lg:top-[53%] lg:h-[850px] lg:w-[850px] lg:opacity-48">
         <Canvas
           camera={{
             position: [
@@ -409,47 +423,57 @@ export default function Earth3D() {
             ],
             fov: 44,
           }}
-          dpr={[1, 1.5]}
+          dpr={[1, 1.35]}
           gl={{
             alpha: true,
             antialias: true,
             powerPreference:
               "high-performance",
           }}
+          onCreated={({ gl }) => {
+            gl.toneMapping =
+              THREE.ACESFilmicToneMapping;
+
+            gl.toneMappingExposure =
+              0.92;
+
+            gl.outputColorSpace =
+              THREE.SRGBColorSpace;
+          }}
         >
           <ambientLight
-            intensity={0.5}
+            intensity={0.2}
           />
 
           <directionalLight
             position={[
-              4,
               5,
-              6,
+              5,
+              7,
             ]}
-            intensity={2.2}
-            color="#9BF4F3"
+            intensity={1.25}
+            color="#A7D8D5"
           />
 
           <directionalLight
             position={[
               -4,
-              -1,
-              4,
+              1,
+              5,
             ]}
-            intensity={1.15}
-            color="#D4AF37"
+            intensity={0.78}
+            color="#D6BA72"
           />
 
           <pointLight
             position={[
-              -4,
-              2,
+              -3,
+              1,
               5,
             ]}
-            intensity={8}
-            distance={15}
-            color="#00D7CF"
+            intensity={2.8}
+            distance={14}
+            color="#D5B96D"
           />
 
           <pointLight
@@ -458,16 +482,18 @@ export default function Earth3D() {
               -2,
               4,
             ]}
-            intensity={5}
-            distance={14}
-            color="#E6BA45"
+            intensity={2.2}
+            distance={15}
+            color="#6EC7C2"
           />
 
           <EarthModel />
         </Canvas>
       </div>
 
-      <div className="absolute left-1/2 top-[58%] h-[370px] w-[370px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/[0.035] blur-[100px] sm:h-[545px] sm:w-[545px] lg:left-[67%] lg:top-[51%] lg:h-[670px] lg:w-[670px]" />
+      <div className="absolute left-1/2 top-[59%] h-[340px] w-[340px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300/[0.018] blur-[110px] sm:h-[470px] sm:w-[470px] lg:left-[69%] lg:top-[53%] lg:h-[570px] lg:w-[570px]" />
+
+      <div className="absolute left-1/2 top-[53%] h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/25 blur-[75px] sm:h-[420px] sm:w-[420px] lg:left-[69%] lg:h-[500px] lg:w-[500px]" />
     </div>
   );
 }

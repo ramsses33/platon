@@ -15,30 +15,44 @@ export default function OrbitRings() {
   const pointerY = useMotionValue(0);
 
   const smoothX = useSpring(pointerX, {
-    stiffness: 35,
-    damping: 18,
-    mass: 0.8,
+    stiffness: 28,
+    damping: 24,
+    mass: 1,
   });
 
   const smoothY = useSpring(pointerY, {
-    stiffness: 35,
-    damping: 18,
-    mass: 0.8,
+    stiffness: 28,
+    damping: 24,
+    mass: 1,
   });
 
   useEffect(() => {
-    const finePointer = window.matchMedia("(pointer: fine)");
+    const finePointer = window.matchMedia(
+      "(pointer: fine)",
+    );
 
-    if (reducedMotion || !finePointer.matches) {
+    if (
+      reducedMotion ||
+      !finePointer.matches
+    ) {
       return;
     }
 
-    function handlePointerMove(event: PointerEvent) {
-      const normalizedX = event.clientX / window.innerWidth - 0.5;
-      const normalizedY = event.clientY / window.innerHeight - 0.5;
+    function handlePointerMove(
+      event: PointerEvent,
+    ) {
+      const normalizedX =
+        event.clientX /
+          window.innerWidth -
+        0.5;
 
-      pointerX.set(normalizedX * 24);
-      pointerY.set(normalizedY * 16);
+      const normalizedY =
+        event.clientY /
+          window.innerHeight -
+        0.5;
+
+      pointerX.set(normalizedX * 7);
+      pointerY.set(normalizedY * 5);
     }
 
     function resetPointer() {
@@ -46,20 +60,38 @@ export default function OrbitRings() {
       pointerY.set(0);
     }
 
-    window.addEventListener("pointermove", handlePointerMove, {
-      passive: true,
-    });
+    window.addEventListener(
+      "pointermove",
+      handlePointerMove,
+      {
+        passive: true,
+      },
+    );
 
-    window.addEventListener("blur", resetPointer);
+    window.addEventListener(
+      "blur",
+      resetPointer,
+    );
 
     return () => {
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("blur", resetPointer);
+      window.removeEventListener(
+        "pointermove",
+        handlePointerMove,
+      );
+
+      window.removeEventListener(
+        "blur",
+        resetPointer,
+      );
     };
-  }, [pointerX, pointerY, reducedMotion]);
+  }, [
+    pointerX,
+    pointerY,
+    reducedMotion,
+  ]);
 
   return (
-    <div className="pointer-events-none absolute inset-[-28%] flex items-center justify-center overflow-visible">
+    <div className="pointer-events-none absolute inset-[-18%] flex items-center justify-center overflow-visible">
       <motion.div
         style={{
           x: smoothX,
@@ -67,188 +99,65 @@ export default function OrbitRings() {
         }}
         className="relative flex h-full w-full items-center justify-center"
       >
+        <div className="absolute h-[48%] w-[48%] rounded-full bg-[#C9A85A]/[0.035] blur-[65px]" />
+
+        <div className="absolute h-[53%] w-[53%] rounded-full border border-[#D8BE76]/[0.055]" />
+
+        <motion.div
+          animate={{
+            rotate: reducedMotion
+              ? -10
+              : 350,
+          }}
+          transition={{
+            duration: 42,
+            repeat: reducedMotion
+              ? 0
+              : Infinity,
+            ease: "linear",
+          }}
+          className="absolute h-[65%] w-[112%] rounded-[50%] border border-[#D9BE72]/20"
+        >
+          <span className="absolute left-[8%] top-[19%] h-1.5 w-1.5 rounded-full bg-[#F0DC9A]/80 shadow-[0_0_8px_rgba(240,220,154,0.38)]" />
+
+          <span className="absolute bottom-[12%] right-[17%] h-1 w-1 rounded-full bg-[#C9A75B]/65" />
+
+          <span className="absolute right-[4%] top-[44%] h-[3px] w-[3px] rounded-full bg-white/35" />
+
+          <span className="absolute left-[46%] top-[-1px] h-[2px] w-12 -translate-x-1/2 rounded-full bg-gradient-to-r from-transparent via-[#F3DEA0]/45 to-transparent blur-[0.5px]" />
+        </motion.div>
+
         <motion.div
           animate={
             reducedMotion
               ? {
-                  opacity: 0.2,
+                  opacity: 0.07,
                   scale: 1,
                 }
               : {
-                  opacity: [0.16, 0.3, 0.16],
-                  scale: [0.96, 1.05, 0.96],
+                  opacity: [
+                    0.035,
+                    0.085,
+                    0.035,
+                  ],
+                  scale: [
+                    0.98,
+                    1.015,
+                    0.98,
+                  ],
                 }
           }
           transition={{
-            duration: 4.5,
-            repeat: reducedMotion ? 0 : Infinity,
+            duration: 7,
+            repeat: reducedMotion
+              ? 0
+              : Infinity,
             ease: "easeInOut",
           }}
-          className="absolute h-[58%] w-[58%] rounded-full bg-yellow-400/[0.08] blur-[55px]"
+          className="absolute h-[73%] w-[73%] rounded-full border border-[#D9BE72]/10"
         />
 
-        <motion.div
-          animate={
-            reducedMotion
-              ? {
-                  scale: 1,
-                  opacity: 0.14,
-                }
-              : {
-                  scale: [0.72, 1.3],
-                  opacity: [0.22, 0],
-                }
-          }
-          transition={{
-            duration: 3.8,
-            repeat: reducedMotion ? 0 : Infinity,
-            ease: "easeOut",
-          }}
-          className="absolute h-[72%] w-[72%] rounded-full border border-yellow-300/20"
-        />
-
-        <motion.div
-          animate={
-            reducedMotion
-              ? {
-                  scale: 1,
-                  opacity: 0.1,
-                }
-              : {
-                  scale: [0.78, 1.42],
-                  opacity: [0.18, 0],
-                }
-          }
-          transition={{
-            duration: 4.8,
-            delay: 1.4,
-            repeat: reducedMotion ? 0 : Infinity,
-            ease: "easeOut",
-          }}
-          className="absolute h-[78%] w-[78%] rounded-full border border-emerald-300/15"
-        />
-
-        <motion.div
-          animate={{
-            rotate: reducedMotion ? 0 : 360,
-          }}
-          transition={{
-            duration: 26,
-            repeat: reducedMotion ? 0 : Infinity,
-            ease: "linear",
-          }}
-          className="absolute h-[82%] w-[82%] rounded-full border border-yellow-300/20 shadow-[0_0_35px_rgba(250,204,21,0.08),inset_0_0_30px_rgba(250,204,21,0.04)]"
-        >
-          <span className="absolute left-1/2 top-[-4px] h-2 w-2 -translate-x-1/2 rounded-full bg-yellow-200 shadow-[0_0_8px_rgba(254,240,138,1),0_0_22px_rgba(250,204,21,0.9)]" />
-
-          <span className="absolute bottom-[12%] right-[5%] h-1.5 w-1.5 rounded-full bg-yellow-400/80 shadow-[0_0_14px_rgba(250,204,21,0.8)]" />
-        </motion.div>
-
-        <motion.div
-          animate={{
-            rotate: reducedMotion ? 18 : -342,
-          }}
-          transition={{
-            duration: 34,
-            repeat: reducedMotion ? 0 : Infinity,
-            ease: "linear",
-          }}
-          className="absolute h-[62%] w-[112%] rounded-[50%] border border-cyan-300/20 shadow-[0_0_34px_rgba(34,211,238,0.06)]"
-        >
-          <span className="absolute left-[12%] top-[4%] h-2 w-2 rounded-full bg-cyan-200 shadow-[0_0_8px_rgba(165,243,252,1),0_0_24px_rgba(34,211,238,0.9)]" />
-
-          <span className="absolute bottom-[5%] right-[17%] h-1.5 w-1.5 rounded-full bg-cyan-400/80 shadow-[0_0_14px_rgba(34,211,238,0.8)]" />
-        </motion.div>
-
-        <motion.div
-          animate={{
-            rotate: reducedMotion ? -28 : 332,
-          }}
-          transition={{
-            duration: 30,
-            repeat: reducedMotion ? 0 : Infinity,
-            ease: "linear",
-          }}
-          className="absolute h-[112%] w-[64%] rounded-[50%] border border-emerald-300/20 shadow-[0_0_35px_rgba(52,211,153,0.06)]"
-        >
-          <span className="absolute right-[5%] top-[22%] h-2 w-2 rounded-full bg-emerald-200 shadow-[0_0_8px_rgba(167,243,208,1),0_0_24px_rgba(52,211,153,0.9)]" />
-        </motion.div>
-
-        <motion.div
-          animate={{
-            rotate: reducedMotion ? 0 : 360,
-          }}
-          transition={{
-            duration: 44,
-            repeat: reducedMotion ? 0 : Infinity,
-            ease: "linear",
-          }}
-          className="absolute h-[132%] w-[132%] rounded-full opacity-70"
-          style={{
-            background:
-              "conic-gradient(from 0deg, transparent 0deg, rgba(34,211,238,0.55) 16deg, transparent 42deg, transparent 112deg, rgba(250,204,21,0.45) 132deg, transparent 162deg, transparent 235deg, rgba(52,211,153,0.45) 252deg, transparent 282deg)",
-            WebkitMaskImage:
-              "radial-gradient(farthest-side, transparent calc(100% - 2px), black calc(100% - 1px))",
-            maskImage:
-              "radial-gradient(farthest-side, transparent calc(100% - 2px), black calc(100% - 1px))",
-          }}
-        />
-
-        <motion.div
-          animate={{
-            rotate: reducedMotion ? 0 : -360,
-          }}
-          transition={{
-            duration: 58,
-            repeat: reducedMotion ? 0 : Infinity,
-            ease: "linear",
-          }}
-          className="absolute h-[150%] w-[150%] rounded-full border border-dashed border-white/[0.07]"
-        >
-          <span className="absolute left-1/2 top-[-3px] h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-white/70 shadow-[0_0_14px_rgba(255,255,255,0.7)]" />
-        </motion.div>
-
-        <motion.div
-          animate={
-            reducedMotion
-              ? {
-                  rotate: 0,
-                }
-              : {
-                  rotate: [0, 360],
-                }
-          }
-          transition={{
-            duration: 18,
-            repeat: reducedMotion ? 0 : Infinity,
-            ease: "linear",
-          }}
-          className="absolute h-[96%] w-[96%]"
-        >
-          <div className="absolute left-1/2 top-0 h-8 w-[2px] -translate-x-1/2 bg-gradient-to-b from-cyan-200 via-cyan-400/70 to-transparent blur-[1px]" />
-        </motion.div>
-
-        <motion.div
-          animate={
-            reducedMotion
-              ? {
-                  rotate: 0,
-                }
-              : {
-                  rotate: [0, -360],
-                }
-          }
-          transition={{
-            duration: 23,
-            repeat: reducedMotion ? 0 : Infinity,
-            ease: "linear",
-          }}
-          className="absolute h-[116%] w-[116%]"
-        >
-          <div className="absolute bottom-0 left-1/2 h-10 w-[2px] -translate-x-1/2 bg-gradient-to-t from-yellow-200 via-yellow-400/70 to-transparent blur-[1px]" />
-        </motion.div>
-
-        <div className="absolute h-[46%] w-[46%] rounded-full border border-yellow-200/10 shadow-[0_0_55px_rgba(212,175,55,0.08),inset_0_0_35px_rgba(212,175,55,0.06)]" />
+        <div className="absolute h-[42%] w-[42%] rounded-full shadow-[0_0_55px_rgba(201,168,90,0.055),inset_0_0_35px_rgba(201,168,90,0.025)]" />
       </motion.div>
     </div>
   );

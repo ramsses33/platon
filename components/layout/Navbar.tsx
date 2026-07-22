@@ -14,7 +14,7 @@ import {
   useState,
 } from "react";
 
-import PlatonMark from "@/components/brand/PlatonMark";
+import PlatonGlyph from "@/components/brand/PlatonGlyph";
 import { supabase } from "@/lib/supabase";
 
 const links = [
@@ -86,8 +86,8 @@ export default function Navbar() {
           href="/"
           className="flex shrink-0 items-center gap-3"
         >
-          <div className="h-11 w-11 shrink-0 rounded-full shadow-[0_5px_20px_rgba(201,156,56,0.24)]">
-            <PlatonMark />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#C9A858]/30 bg-gradient-to-br from-[#211E17] via-[#0E0D0B] to-black shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_24px_rgba(201,168,88,0.16)]">
+            <PlatonGlyph className="h-8 w-8" />
           </div>
 
           <div>
