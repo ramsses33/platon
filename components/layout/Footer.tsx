@@ -1,3 +1,4 @@
+import PlatonGlyph from "@/components/brand/PlatonGlyph";
 import Link from "next/link";
 
 type FooterLink = {
@@ -87,8 +88,8 @@ export default function Footer() {
             href="/"
             className="inline-flex items-center gap-3"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-700 text-2xl font-black text-black">
-              π
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#C9A858]/30 bg-gradient-to-br from-[#211E17] via-[#0E0D0B] to-black shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_24px_rgba(201,168,88,0.14)]">
+              <PlatonGlyph className="h-9 w-9" />
             </div>
 
             <div>
