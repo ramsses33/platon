@@ -1,14 +1,14 @@
 "use client";
 
+import {
+  Menu,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import {
   usePathname,
   useRouter,
 } from "next/navigation";
-import {
-  Menu,
-  X,
-} from "lucide-react";
 import {
   useEffect,
   useState,
@@ -46,7 +46,7 @@ export default function Navbar() {
         await supabase.auth.getUser();
 
       setEmail(
-        data.user?.email ?? null
+        data.user?.email ?? null,
       );
     }
 
@@ -59,9 +59,9 @@ export default function Navbar() {
         (_event, session) => {
           setEmail(
             session?.user?.email ??
-              null
+              null,
           );
-        }
+        },
       );
 
     return () => {
@@ -81,7 +81,7 @@ export default function Navbar() {
 
   return (
     <nav className="fixed left-1/2 top-5 z-50 w-[calc(100%-40px)] max-w-7xl -translate-x-1/2 rounded-3xl border border-white/10 bg-black/40 px-5 py-4 text-white shadow-[0_0_80px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
-      <div className="flex items-center justify-between gap-6">
+      <div className="flex items-center gap-4">
         <Link
           href="/"
           className="flex shrink-0 items-center gap-3"
@@ -101,13 +101,13 @@ export default function Navbar() {
           </div>
         </Link>
 
-        <div className="hidden min-w-0 items-center gap-1 text-sm text-gray-300 xl:flex">
+        <div className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 text-[13px] text-gray-300 xl:flex">
           {links.map(
             ([label, href]) => (
               <Link
                 key={href}
                 href={href}
-                className={`whitespace-nowrap rounded-2xl px-3 py-2 transition ${
+                className={`whitespace-nowrap rounded-xl px-2.5 py-2 transition ${
                   pathname === href
                     ? "bg-emerald-400/15 text-emerald-300"
                     : "hover:bg-white/5 hover:text-white"
@@ -115,67 +115,69 @@ export default function Navbar() {
               >
                 {label}
               </Link>
-            )
+            ),
           )}
         </div>
 
-        <div className="hidden shrink-0 items-center gap-3 md:flex">
-          {email ? (
-            <>
-              <span className="max-w-[150px] truncate text-sm text-emerald-300">
-                {email}
-              </span>
+        <div className="ml-auto flex shrink-0 items-center gap-3">
+          <div className="hidden shrink-0 items-center gap-3 md:flex">
+            {email ? (
+              <>
+                <span className="max-w-[135px] truncate text-[13px] text-emerald-300">
+                  {email}
+                </span>
 
-              <button
-                type="button"
-                onClick={() => {
-                  void handleLogout();
-                }}
-                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="text-sm text-gray-300 transition hover:text-white"
-              >
-                Login
-              </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void handleLogout();
+                  }}
+                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-sm text-gray-300 transition hover:text-white"
+                >
+                  Login
+                </Link>
 
-              <Link
-                href="/register"
-                className="rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-5 py-3 text-sm font-bold text-black"
-              >
-                Create Wallet
-              </Link>
-            </>
-          )}
+                <Link
+                  href="/register"
+                  className="rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 text-sm font-bold text-black"
+                >
+                  Create Wallet
+                </Link>
+              </>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(
+                (currentOpen) =>
+                  !currentOpen,
+              );
+            }}
+            className="rounded-2xl border border-white/10 bg-white/5 p-3 transition hover:bg-white/10 xl:hidden"
+            aria-label={
+              open
+                ? "Close navigation menu"
+                : "Open navigation menu"
+            }
+          >
+            {open ? (
+              <X size={22} />
+            ) : (
+              <Menu size={22} />
+            )}
+          </button>
         </div>
-
-        <button
-          type="button"
-          onClick={() => {
-            setOpen(
-              (currentOpen) =>
-                !currentOpen
-            );
-          }}
-          className="rounded-2xl border border-white/10 bg-white/5 p-3 xl:hidden"
-          aria-label={
-            open
-              ? "Close navigation menu"
-              : "Open navigation menu"
-          }
-        >
-          {open ? (
-            <X size={22} />
-          ) : (
-            <Menu size={22} />
-          )}
-        </button>
       </div>
 
       {open && (
@@ -196,7 +198,7 @@ export default function Navbar() {
               >
                 {label}
               </Link>
-            )
+            ),
           )}
 
           {email ? (
