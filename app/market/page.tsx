@@ -1,9 +1,9 @@
-import Navbar from "@/components/layout/Navbar";
+import PlatonGlyph from "@/components/brand/PlatonGlyph";
 import Footer from "@/components/layout/Footer";
-
-import MarketHeaderStats from "@/components/market/MarketHeaderStats";
-import LiveChart from "@/components/market/LiveChart";
+import Navbar from "@/components/layout/Navbar";
 import BuySellPanel from "@/components/market/BuySellPanel";
+import LiveChart from "@/components/market/LiveChart";
+import MarketHeaderStats from "@/components/market/MarketHeaderStats";
 import OrderBook from "@/components/market/OrderBook";
 import RecentTrades from "@/components/market/RecentTrades";
 
@@ -22,7 +22,7 @@ export default function MarketPage() {
         </div>
 
         <div className="relative mx-auto w-full max-w-[1600px] px-4 pb-24 pt-32 sm:px-6 lg:px-8">
-          <div className="mb-10">
+          <div className="mb-6">
             <div className="flex flex-wrap items-center gap-3">
               <div className="inline-flex items-center gap-2 rounded-full border border-yellow-400/20 bg-yellow-400/[0.08] px-4 py-2">
                 <span className="relative flex h-2 w-2">
@@ -42,16 +42,21 @@ export default function MarketPage() {
             </div>
 
             <div className="mt-6 max-w-4xl">
-              <h1 className="text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
-                Buy & Sell{" "}
-                <span className="bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-600 bg-clip-text text-transparent">
-                  π
+              <h1 className="flex flex-wrap items-center gap-x-3 text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
+                <span>Buy &amp; Sell</span>
+
+                <span className="sr-only">
+                  PLATON
+                </span>
+
+                <span className="inline-flex h-[0.82em] w-[0.82em] shrink-0 translate-y-[0.04em]">
+                  <PlatonGlyph className="h-full w-full" />
                 </span>
               </h1>
 
-              <p className="mt-5 max-w-3xl text-base leading-8 text-white/45 sm:text-lg">
-                PLATON is traded exclusively through its official market.
-                The network price updates every 13 minutes.
+              <p className="mt-4 max-w-3xl text-base leading-8 text-white/45 sm:text-lg">
+                PLATON is traded exclusively through its official market. The
+                network price updates every 13 minutes.
               </p>
             </div>
           </div>

@@ -24,6 +24,11 @@ type PricePoint = {
   created_at: string;
 };
 
+type MarketPriceRow = {
+  price: number | string;
+  updated_at: string;
+};
+
 type ChartPoint = {
   id: number;
   timestamp: number;
@@ -35,6 +40,34 @@ type ChartPoint = {
 type TimeRange = "1H" | "6H" | "24H" | "ALL";
 
 const ranges: TimeRange[] = ["1H", "6H", "24H", "ALL"];
+const REFRESH_INTERVAL_MS = 15000;
+
+function createChartPoint(
+  id: number,
+  price: number,
+  dateValue: string,
+): ChartPoint | null {
+  const date = new Date(dateValue);
+  const timestamp = date.getTime();
+
+  if (
+    !Number.isFinite(price) ||
+    !Number.isFinite(timestamp)
+  ) {
+    return null;
+  }
+
+  return {
+    id,
+    timestamp,
+    time: date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    fullTime: date.toLocaleString(),
+    price,
+  };
+}
 
 export default function LiveChart() {
   const [history, setHistory] = useState<ChartPoint[]>([]);
@@ -44,58 +77,118 @@ export default function LiveChart() {
     useState<"CONNECTING" | "LIVE" | "OFFLINE">("CONNECTING");
 
   const loadPriceHistory = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("price_history")
-      .select("id, price, created_at")
-      .order("created_at", { ascending: true })
-      .limit(500);
+    const [historyResult, marketPriceResult] = await Promise.all([
+      supabase
+        .from("price_history")
+        .select("id, price, created_at")
+        .order("created_at", { ascending: false })
+        .limit(500),
 
-    if (error) {
-      console.error("Failed to load price history:", error);
+      supabase
+        .from("market_price")
+        .select("price, updated_at")
+        .eq("id", 1)
+        .single(),
+    ]);
+
+    if (historyResult.error) {
+      console.error(
+        "Failed to load price history:",
+        historyResult.error,
+      );
       setLoading(false);
       return;
     }
 
-    const formatted = ((data ?? []) as PricePoint[])
-      .map((item) => {
-        const date = new Date(item.created_at);
-
-        return {
-          id: Number(item.id),
-          timestamp: date.getTime(),
-          time: date.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          fullTime: date.toLocaleString(),
-          price: Number(item.price),
-        };
-      })
+    const formattedHistory = (
+      (historyResult.data ?? []) as PricePoint[]
+    )
+      .map((item) =>
+        createChartPoint(
+          Number(item.id),
+          Number(item.price),
+          item.created_at,
+        ),
+      )
       .filter(
-        (item) =>
-          Number.isFinite(item.price) &&
-          Number.isFinite(item.timestamp)
+        (item): item is ChartPoint => item !== null,
+      )
+      .sort(
+        (firstPoint, secondPoint) =>
+          firstPoint.timestamp - secondPoint.timestamp,
       );
 
-    setHistory(formatted);
+    let synchronizedHistory = formattedHistory;
+
+    if (
+      !marketPriceResult.error &&
+      marketPriceResult.data
+    ) {
+      const marketPrice =
+        marketPriceResult.data as MarketPriceRow;
+
+      const officialPoint = createChartPoint(
+        Number.MAX_SAFE_INTEGER,
+        Number(marketPrice.price),
+        marketPrice.updated_at,
+      );
+
+      if (officialPoint) {
+        synchronizedHistory = [
+          ...formattedHistory.filter(
+            (point) =>
+              point.timestamp !== officialPoint.timestamp,
+          ),
+          officialPoint,
+        ].sort(
+          (firstPoint, secondPoint) =>
+            firstPoint.timestamp - secondPoint.timestamp,
+        );
+      }
+    } else if (marketPriceResult.error) {
+      console.error(
+        "Failed to load official PLATON price:",
+        marketPriceResult.error,
+      );
+    }
+
+    setHistory(synchronizedHistory);
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    loadPriceHistory();
+    const refreshHistory = () => {
+      void loadPriceHistory();
+    };
+
+    const initialLoadTimer = window.setTimeout(
+      refreshHistory,
+      0,
+    );
+
+    const channelName =
+      `market-live-chart-${window.crypto.randomUUID()}`;
 
     const channel = supabase
-      .channel("market-live-chart")
+      .channel(channelName)
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "INSERT",
           schema: "public",
           table: "price_history",
         },
-        () => {
-          loadPriceHistory();
-        }
+        refreshHistory,
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "market_price",
+          filter: "id=eq.1",
+        },
+        refreshHistory,
       )
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
@@ -109,13 +202,15 @@ export default function LiveChart() {
         }
       });
 
-    const fallbackInterval = window.setInterval(() => {
-      loadPriceHistory();
-    }, 15000);
+    const fallbackInterval = window.setInterval(
+      refreshHistory,
+      REFRESH_INTERVAL_MS,
+    );
 
     return () => {
+      window.clearTimeout(initialLoadTimer);
       window.clearInterval(fallbackInterval);
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
   }, [loadPriceHistory]);
 
@@ -124,7 +219,8 @@ export default function LiveChart() {
       return history;
     }
 
-    const now = Date.now();
+    const latestTimestamp =
+      history[history.length - 1]?.timestamp ?? 0;
 
     const duration =
       timeRange === "1H"
@@ -133,11 +229,10 @@ export default function LiveChart() {
           ? 6 * 60 * 60 * 1000
           : 24 * 60 * 60 * 1000;
 
-    const filtered = history.filter(
-      (point) => point.timestamp >= now - duration
+    return history.filter(
+      (point) =>
+        point.timestamp >= latestTimestamp - duration,
     );
-
-    return filtered.length > 0 ? filtered : history;
   }, [history, timeRange]);
 
   const chartStats = useMemo(() => {
@@ -274,7 +369,7 @@ export default function LiveChart() {
         {loading ? (
           <ChartMessage text="Loading market history..." />
         ) : data.length === 0 ? (
-          <ChartMessage text="No price history available." />
+          <ChartMessage text="No price history available for this range." />
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
